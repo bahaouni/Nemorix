@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nemorix"
+version = "0.1.0"
+description = "Virtual Memory for Autonomous AI Agents — CXL-aware KV-cache tiering"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Nemorix Contributors"},
+]
+keywords = ["llm", "kv-cache", "cxl", "memory-management", "inference", "agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Hardware",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/nemorix-project/nemorix"
+Documentation = "https://github.com/nemorix-project/nemorix#readme"
+Issues = "https://github.com/nemorix-project/nemorix/issues"
+
+[project.optional-dependencies]
+api = ["fastapi>=0.104", "uvicorn>=0.24", "pydantic>=2.0"]
+plot = ["matplotlib>=3.8"]
+dev = ["pytest>=7.0"]
+all = ["fastapi>=0.104", "uvicorn>=0.24", "pydantic>=2.0", "matplotlib>=3.8", "pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
