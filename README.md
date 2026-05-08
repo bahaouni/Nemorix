@@ -21,7 +21,6 @@
 
 Covers: [Quick Start](https://bahaouni.github.io/nemorix/#/guide/quickstart) · [Memory Tiers](https://bahaouni.github.io/nemorix/#/guide/tiers) · [Eviction Policies](https://bahaouni.github.io/nemorix/#/guide/eviction) · [CLI Reference](https://bahaouni.github.io/nemorix/#/guide/cli) · [Python API](https://bahaouni.github.io/nemorix/#/guide/api) · [Benchmarks](https://bahaouni.github.io/nemorix/#/guide/benchmarks)
 
-> To enable GitHub Pages: go to your repo → **Settings → Pages → Source: Deploy from branch → Branch: main, Folder: /docs**.
 
 ---
 
