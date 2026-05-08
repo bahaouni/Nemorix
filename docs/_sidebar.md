@@ -22,5 +22,5 @@
 
 * **Development**
   * [Running Tests](guide/testing.md)
-  * [Contributing](https://github.com/your-org/nemorix/blob/main/CONTRIBUTING.md)
-  * [Changelog](https://github.com/your-org/nemorix/blob/main/CHANGELOG.md)
+  * [Contributing](https://github.com/bahaouni/nemorix/blob/main/CONTRIBUTING.md)
+  * [Changelog](https://github.com/bahaouni/nemorix/blob/main/CHANGELOG.md)

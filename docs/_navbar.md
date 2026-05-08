@@ -1,2 +1,2 @@
-* [GitHub](https://github.com/your-org/nemorix)
+* [GitHub](https://github.com/bahaouni/nemorix)
 * [PyPI](https://pypi.org/project/nemorix/)

@@ -10,7 +10,7 @@
 ### Core + tests (recommended for development)
 
 ```bash
-git clone https://github.com/your-org/nemorix.git
+git clone https://github.com/bahaouni/nemorix.git
 cd nemorix
 pip install -e ".[dev]"
 ```

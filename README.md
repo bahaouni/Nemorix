@@ -11,15 +11,15 @@
 [![CI](https://github.com/nemorix-project/nemorix/actions/workflows/ci.yml/badge.svg)](https://github.com/nemorix-project/nemorix/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-7c3aed)](https://your-org.github.io/nemorix/)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-7c3aed)](https://bahaouni.github.io/nemorix/)
 
 ---
 
 ## Documentation
 
-**Full docs site:** [your-org.github.io/nemorix](https://your-org.github.io/nemorix/)
+**Full docs site:** [bahaouni.github.io/nemorix](https://bahaouni.github.io/nemorix/)
 
-Covers: [Quick Start](https://your-org.github.io/nemorix/#/guide/quickstart) · [Memory Tiers](https://your-org.github.io/nemorix/#/guide/tiers) · [Eviction Policies](https://your-org.github.io/nemorix/#/guide/eviction) · [CLI Reference](https://your-org.github.io/nemorix/#/guide/cli) · [Python API](https://your-org.github.io/nemorix/#/guide/api) · [Benchmarks](https://your-org.github.io/nemorix/#/guide/benchmarks)
+Covers: [Quick Start](https://bahaouni.github.io/nemorix/#/guide/quickstart) · [Memory Tiers](https://bahaouni.github.io/nemorix/#/guide/tiers) · [Eviction Policies](https://bahaouni.github.io/nemorix/#/guide/eviction) · [CLI Reference](https://bahaouni.github.io/nemorix/#/guide/cli) · [Python API](https://bahaouni.github.io/nemorix/#/guide/api) · [Benchmarks](https://bahaouni.github.io/nemorix/#/guide/benchmarks)
 
 > To enable GitHub Pages: go to your repo → **Settings → Pages → Source: Deploy from branch → Branch: main, Folder: /docs**.
 

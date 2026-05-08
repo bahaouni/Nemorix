@@ -62,4 +62,4 @@ python benchmarks/run_simulation.py
 ## License
 
 MIT — free to use, modify, and distribute.  
-See [CONTRIBUTING](https://github.com/your-org/nemorix/blob/main/CONTRIBUTING.md) to get involved.
+See [CONTRIBUTING](https://github.com/bahaouni/nemorix/blob/main/CONTRIBUTING.md) to get involved.

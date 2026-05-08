@@ -10,7 +10,7 @@ CXL-aware KV-cache tiering that treats agent memory
 like an OS memory hierarchy — sleep, wake, migrate, repeat.
 
 [Get Started](guide/quickstart.md)
-[View on GitHub](https://github.com/your-org/nemorix)
+[View on GitHub](https://github.com/bahaouni/nemorix)
 
 <!-- background color -->
 ![color](#1a1a2e)
