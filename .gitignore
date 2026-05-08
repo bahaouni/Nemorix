@@ -56,3 +56,8 @@ benchmarks/*.pdf
 
 # Jupyter
 .ipynb_checkpoints/
+DOCUMENTATION.md
+HONEST_ASSESSMENT.md
+NEXT_LEVEL.md
+SKILLS.md
+SUBMISSION.md
