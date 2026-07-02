@@ -10,11 +10,11 @@
 | | Without Nemorix | With Nemorix |
 |---|---|---|
 | Agents under 200ms SLA | **0** out of 50 | **50** out of 50 |
-| Average resume latency | 1,205 ms | **24.7 ms** |
-| P99 resume latency | 1,638 ms | **38.6 ms** |
-| Cost per agent-hour | $7.01 | **$0.21** |
+| Average resume latency | 1,205 ms | **9.9 ms** |
+| P99 resume latency | 1,638 ms | **15.6 ms** |
+| Cost per agent-hour | $7.01 | **$0.17** |
 
-**49× faster · 97% cheaper · 8× more agents on the same GPU.**
+**122× faster · 98% cheaper · 8× more agents on the same GPU.**
 
 ---
 
