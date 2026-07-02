@@ -76,7 +76,7 @@ class WorkloadGenerator:
                     num_tokens=context_tokens,
                     size_bytes=size,
                     dtype="fp16",
-                    attention_score=attn_score,
+                    importance_score=attn_score,
                     tier="ssd",  # start cold
                 )
             )

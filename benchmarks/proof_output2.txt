@@ -1,0 +1,96 @@
+
+##############################################################################
+#  NEMORIX RETENTION LAW -- PROOF HARNESS
+#  Four classes of evidence that the formula is correct & good.
+##############################################################################
+
+  [ 1/18] seed= 11  policy=lru     
+  [ 2/18] seed= 11  policy=semantic
+  [ 3/18] seed= 11  policy=belady  
+  [ 4/18] seed= 23  policy=lru     
+  [ 5/18] seed= 23  policy=semantic
+  [ 6/18] seed= 23  policy=belady  
+  [ 7/18] seed= 42  policy=lru     
+  [ 8/18] seed= 42  policy=semantic
+  [ 9/18] seed= 42  policy=belady  
+  [10/18] seed= 57  policy=lru     
+  [11/18] seed= 57  policy=semantic
+  [12/18] seed= 57  policy=belady  
+  [13/18] seed= 71  policy=lru     
+  [14/18] seed= 71  policy=semantic
+  [15/18] seed= 71  policy=belady  
+  [16/18] seed= 88  policy=lru     
+  [17/18] seed= 88  policy=semantic
+  [18/18] seed= 88  policy=belady  
+
+==============================================================================
+  PROOF A -- Optimality gap vs Belady's MIN (the textbook optimum)
+==============================================================================
+  Belady minimizes MISSES => compare on eviction accuracy (hit-rate
+  aligned). Efficiency = (Nemorix - LRU)/(Belady - LRU) in [0,1].
+  Saturated point: 550 agents, 300 steps, 6 seeds.
+
+  (1) HIT-RATE objective -- eviction accuracy (Belady IS the bound):
+      LRU                     42.3%
+      Nemorix                 42.4%
+      Belady (optimal)        45.2%
+      >> Nemorix closes 1% of the LRU->optimal hit-rate gap.
+
+  (2) SLA objective -- agents under 200 ms (production metric):
+      LRU                     50.3  +/- 7.4
+      Belady (miss-opt)      135.0  +/- 3.4
+      Nemorix                264.7  +/- 6.0
+      >> Nemorix/LRU = 5.3x on SLA.
+      >> Nemorix even exceeds miss-optimal Belady on SLA, because SLA
+         rewards tier-aware placement + agent value that MIN ignores.
+
+==============================================================================
+  PROOF B -- Ablation: does every retention term earn its place?
+==============================================================================
+  Remove one term (weight -> 0, renormalize). An SLA drop proves the
+  term is load-bearing, not decoration.
+
+  Full formula: 264.7 SLA agents (+/- 6.0)
+
+  Term removed                   SLA     Drop        Verdict
+  ----------------------------------------------------------
+  wake-hazard (recency)        267.0     -2.3       marginal
+  salience (importance)        269.7     -5.0       marginal
+  priority                     246.2     18.5   load-bearing
+  reload cost (recompute)      269.0     -4.3       marginal
+
+==============================================================================
+  PROOF C -- Statistical significance (Nemorix vs LRU on SLA)
+==============================================================================
+  6 seeds. Non-overlapping 95% CIs => the win is real.
+
+  LRU     :   50.3  [  43.0,   57.7]
+  Nemorix :  264.7  [ 258.6,  270.7]
+  Welch t = 44.2  (|t|>2 ~ significant at 95%)
+  CIs overlap? NO -> SIGNIFICANT
+
+==============================================================================
+  PROOF D -- Weight robustness (+/-50% perturbation)
+==============================================================================
+  Perturb each weight, renormalize; the SLA win must survive =>
+  not hand-tuned to one fragile configuration.
+
+  LRU baseline: 50.3 SLA agents
+
+  Perturbation                   SLA    vs LRU
+  ----------------------------------------------
+  recency +50%                 266.0      5.3x
+  recency -50%                 265.3      5.3x
+  importance +50%              265.8      5.3x
+  importance -50%              266.7      5.3x
+  priority +50%                268.5      5.3x
+  priority -50%                259.8      5.2x
+  recompute +50%               263.3      5.2x
+  recompute -50%               268.8      5.3x
+
+  >> Worst-case advantage across ALL perturbations: 5.2x over LRU.
+
+==============================================================================
+  Machine-readable report -> C:\Users\ouni01\OneDrive - imec\Desktop\innovation challenge\benchmarks\proof_results.json
+==============================================================================
+

@@ -313,7 +313,7 @@ def _make_block(bid, agent_id="a1", layer=0, attention=0.5, accessed=0.0, tokens
     return KVBlock(
         block_id=bid, agent_id=agent_id, layer_idx=layer,
         num_tokens=tokens, size_bytes=tokens * 256, dtype="fp16",
-        attention_score=attention, last_accessed=accessed,
+        importance_score=attention, last_accessed=accessed,
     )
 
 

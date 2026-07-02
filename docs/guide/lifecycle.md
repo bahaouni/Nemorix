@@ -33,35 +33,31 @@ Agents migrate down the tier hierarchy based on how long they've been idle:
 ```python
 from nemorix.core.scheduler import AgentScheduler
 from nemorix.core.tier_manager import MemoryTierManager
-from nemorix.core.agent import AgentMemoryObject
 from nemorix.policies.semantic import SemanticEvictionPolicy
+from nemorix.simulation.workload import WorkloadGenerator
 
 manager = MemoryTierManager()
-scheduler = AgentScheduler(
-    tier_manager=manager,
-    eviction_policy=SemanticEvictionPolicy(),
-    idle_threshold_secs=300,    # move to CXL after 5 min idle
+policy = SemanticEvictionPolicy()
+scheduler = AgentScheduler(manager, policy)
+
+# Build an agent (with its per-layer KV blocks) and register it
+agent = WorkloadGenerator(seed=42).create_agent(
+    context_tokens=65_536, priority=7, activation_prob=0.05,
 )
+policy.set_agent_priority(agent.agent_id, agent.priority)
+scheduler.register_agent(agent)
 
-# Register an agent
-agent = AgentMemoryObject(
-    agent_id="my-agent",
-    total_context_tokens=65_536,
-    priority=7,
-    activation_probability=0.05,
-)
+# Activate (pages blocks to GPU). Time is in seconds.
+latency_ms = scheduler.activate_agent(agent.agent_id, current_time=0.0)
+print(f"Resumed in {latency_ms:.1f} ms; now in {agent.primary_tier}")
 
-# Activate (loads from current tier)
-latency_ms = scheduler.activate_agent(agent)
-print(f"Resumed in {latency_ms:.1f} ms from {agent.primary_tier}")
+# Demote to CXL explicitly...
+scheduler.deactivate_agent(agent.agent_id, "cxl", current_time=60.0)
 
-# Signal idle (will migrate to CXL after threshold)
-scheduler.deactivate_agent(agent)
+# ...or let the scheduler demote idle agents automatically.
+scheduler.suspend_idle_agents(current_time=400.0, idle_threshold_s=300.0)
 
-# Advance time — agents past the threshold migrate
-scheduler.suspend_idle_agents(current_time_secs=400)  # 400s elapsed
-
-print(f"Agent is now in: {agent.primary_tier}")   # → 'cxl'
+print(f"Agent is now in: {agent.primary_tier}")
 ```
 
 ## Agent Fields

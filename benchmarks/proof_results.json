@@ -1,0 +1,99 @@
+{
+  "config": {
+    "agents": 550,
+    "steps": 300,
+    "seeds": [
+      11,
+      23,
+      42,
+      57,
+      71,
+      88
+    ]
+  },
+  "proof_a_optimality_gap": {
+    "hit_rate": {
+      "lru": 0.4231220662323689,
+      "semantic": 0.423515373676195,
+      "belady": 0.4516463740152679
+    },
+    "hit_rate_gap_closed": 0.013788500910156832,
+    "sla": {
+      "lru": 50.333333333333336,
+      "semantic": 264.6666666666667,
+      "belady": 135.0
+    },
+    "sla_speedup_vs_lru": 5.258278145695364
+  },
+  "proof_b_ablation": {
+    "full_mean": 264.6666666666667,
+    "ablations": {
+      "wake-hazard (recency)": {
+        "mean": 267.0,
+        "drop": -2.3333333333333144,
+        "verdict": "adds noise"
+      },
+      "salience (importance)": {
+        "mean": 269.6666666666667,
+        "drop": -5.0,
+        "verdict": "adds noise"
+      },
+      "priority": {
+        "mean": 246.16666666666666,
+        "drop": 18.50000000000003,
+        "verdict": "load-bearing"
+      },
+      "reload cost (recompute)": {
+        "mean": 269.0,
+        "drop": -4.333333333333314,
+        "verdict": "adds noise"
+      }
+    }
+  },
+  "proof_c_significance": {
+    "lru_mean": 50.333333333333336,
+    "lru_ci95": 7.362692744128634,
+    "semantic_mean": 264.6666666666667,
+    "semantic_ci95": 6.02343571209802,
+    "welch_t": 44.161421309503524,
+    "ci_overlap": false
+  },
+  "proof_d_robustness": {
+    "lru_mean": 50.333333333333336,
+    "perturbations": {
+      "w_recency +50%": {
+        "mean": 266.0,
+        "ratio": 5.28476821192053
+      },
+      "w_recency -50%": {
+        "mean": 265.3333333333333,
+        "ratio": 5.271523178807946
+      },
+      "w_importance +50%": {
+        "mean": 265.8333333333333,
+        "ratio": 5.281456953642383
+      },
+      "w_importance -50%": {
+        "mean": 266.6666666666667,
+        "ratio": 5.298013245033113
+      },
+      "w_priority +50%": {
+        "mean": 268.5,
+        "ratio": 5.334437086092715
+      },
+      "w_priority -50%": {
+        "mean": 259.8333333333333,
+        "ratio": 5.162251655629138
+      },
+      "w_recompute +50%": {
+        "mean": 263.3333333333333,
+        "ratio": 5.231788079470198
+      },
+      "w_recompute -50%": {
+        "mean": 268.8333333333333,
+        "ratio": 5.341059602649006
+      }
+    },
+    "worst_ratio": 5.162251655629138
+  }
+}

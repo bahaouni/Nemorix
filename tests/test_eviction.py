@@ -21,7 +21,7 @@ def make_block(
         layer_idx=layer_idx,
         num_tokens=1024,
         size_bytes=size,
-        attention_score=attention,
+        importance_score=attention,
         last_accessed=last_accessed,
     )
 

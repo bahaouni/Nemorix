@@ -49,14 +49,14 @@ python benchmarks/run_simulation.py --agents 50 --tokens 65536 --hours 24 --seed
 ```
   Metric                         No Offload        LRU      Nemorix
   ─────────────────────────────────────────────────────────────────
-  Agents under SLA (<200ms)               0         47         50
+  Agents under SLA (<200ms)               0         50         50
   Max GPU-resident agents                 6          6          6
-  Avg resume latency               1205.3ms      148.5ms    24.7ms
-  P50 resume latency               1279.3ms      178.7ms    24.9ms
-  P99 resume latency               1638.1ms      285.8ms    38.6ms
+  Avg resume latency               1205.5ms      10.4ms      9.9ms
+  P50 resume latency               1279.3ms      10.0ms      9.6ms
+  P99 resume latency               1638.1ms      15.6ms     15.6ms
   GPU utilization                       90%        90%        91%
   Eviction accuracy                     N/A        42%        41%
-  Cost per agent-hour (incl. GPU)     $7.01       $0.16      $0.21
+  Cost per agent-hour (incl. GPU)     $7.01       $0.17      $0.17
 ```
 
 Results are also written to `benchmarks/results.json`.

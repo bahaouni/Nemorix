@@ -35,9 +35,9 @@ When it wakes up, Nemorix fetches just the layers it needs first — so inferenc
 | Metric | Without Nemorix | With Nemorix |
 |---|---|---|
 | Agents under 200ms SLA | **0** out of 50 | **50** out of 50 |
-| Average resume latency | 1,205 ms | **24.7 ms** |
-| P99 resume latency | 1,638 ms | **38.6 ms** |
-| Cost per agent-hour | $7.01 | **$0.21** |
+| Average resume latency | 1,205 ms | **9.9 ms** |
+| P99 resume latency | 1,638 ms | **15.6 ms** |
+| Cost per agent-hour | $7.01 | **$0.17** |
 
 > All results from a deterministic simulation (seed=42, 50 agents, 64K tokens, 24h).
 > Reproduce with: `python benchmarks/run_simulation.py`

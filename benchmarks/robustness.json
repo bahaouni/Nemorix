@@ -1,0 +1,285 @@
+{
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49
+  ],
+  "n_seeds": 8,
+  "metrics": {
+    "no_offload.sla_agents": {
+      "policy": "no_offload",
+      "metric": "sla_agents",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 8
+    },
+    "lru.sla_agents": {
+      "policy": "lru",
+      "metric": "sla_agents",
+      "mean": 50.0,
+      "std": 0.0,
+      "min": 50.0,
+      "max": 50.0,
+      "n": 8
+    },
+    "semantic.sla_agents": {
+      "policy": "semantic",
+      "metric": "sla_agents",
+      "mean": 50.0,
+      "std": 0.0,
+      "min": 50.0,
+      "max": 50.0,
+      "n": 8
+    },
+    "no_offload.max_gpu_resident_agents": {
+      "policy": "no_offload",
+      "metric": "max_gpu_resident_agents",
+      "mean": 6.125,
+      "std": 0.3307,
+      "min": 6.0,
+      "max": 7.0,
+      "n": 8
+    },
+    "lru.max_gpu_resident_agents": {
+      "policy": "lru",
+      "metric": "max_gpu_resident_agents",
+      "mean": 6.125,
+      "std": 0.3307,
+      "min": 6.0,
+      "max": 7.0,
+      "n": 8
+    },
+    "semantic.max_gpu_resident_agents": {
+      "policy": "semantic",
+      "metric": "max_gpu_resident_agents",
+      "mean": 6.125,
+      "std": 0.3307,
+      "min": 6.0,
+      "max": 7.0,
+      "n": 8
+    },
+    "no_offload.avg_resume_latency_ms": {
+      "policy": "no_offload",
+      "metric": "avg_resume_latency_ms",
+      "mean": 1151.1484,
+      "std": 41.7163,
+      "min": 1066.6468,
+      "max": 1205.5458,
+      "n": 8
+    },
+    "lru.avg_resume_latency_ms": {
+      "policy": "lru",
+      "metric": "avg_resume_latency_ms",
+      "mean": 9.9904,
+      "std": 0.2959,
+      "min": 9.3961,
+      "max": 10.3702,
+      "n": 8
+    },
+    "semantic.avg_resume_latency_ms": {
+      "policy": "semantic",
+      "metric": "avg_resume_latency_ms",
+      "mean": 9.4962,
+      "std": 0.2066,
+      "min": 9.1861,
+      "max": 9.8795,
+      "n": 8
+    },
+    "no_offload.p50_resume_latency_ms": {
+      "policy": "no_offload",
+      "metric": "p50_resume_latency_ms",
+      "mean": 1157.8375,
+      "std": 52.1786,
+      "min": 1101.55,
+      "max": 1279.275,
+      "n": 8
+    },
+    "lru.p50_resume_latency_ms": {
+      "policy": "lru",
+      "metric": "p50_resume_latency_ms",
+      "mean": 9.9218,
+      "std": 0.3443,
+      "min": 9.3081,
+      "max": 10.4463,
+      "n": 8
+    },
+    "semantic.p50_resume_latency_ms": {
+      "policy": "semantic",
+      "metric": "p50_resume_latency_ms",
+      "mean": 9.8151,
+      "std": 0.251,
+      "min": 9.5156,
+      "max": 10.4163,
+      "n": 8
+    },
+    "no_offload.p95_resume_latency_ms": {
+      "policy": "no_offload",
+      "metric": "p95_resume_latency_ms",
+      "mean": 1552.6625,
+      "std": 35.643,
+      "min": 1471.8,
+      "max": 1582.85,
+      "n": 8
+    },
+    "lru.p95_resume_latency_ms": {
+      "policy": "lru",
+      "metric": "p95_resume_latency_ms",
+      "mean": 14.4966,
+      "std": 0.2526,
+      "min": 13.9899,
+      "max": 14.8575,
+      "n": 8
+    },
+    "semantic.p95_resume_latency_ms": {
+      "policy": "semantic",
+      "metric": "p95_resume_latency_ms",
+      "mean": 14.3822,
+      "std": 0.4036,
+      "min": 13.4253,
+      "max": 14.8575,
+      "n": 8
+    },
+    "no_offload.p99_resume_latency_ms": {
+      "policy": "no_offload",
+      "metric": "p99_resume_latency_ms",
+      "mean": 1608.8219,
+      "std": 25.6301,
+      "min": 1558.675,
+      "max": 1638.1,
+      "n": 8
+    },
+    "lru.p99_resume_latency_ms": {
+      "policy": "lru",
+      "metric": "p99_resume_latency_ms",
+      "mean": 15.3039,
+      "std": 0.2739,
+      "min": 14.8697,
+      "max": 15.6271,
+      "n": 8
+    },
+    "semantic.p99_resume_latency_ms": {
+      "policy": "semantic",
+      "metric": "p99_resume_latency_ms",
+      "mean": 15.3049,
+      "std": 0.2583,
+      "min": 14.8697,
+      "max": 15.6271,
+      "n": 8
+    },
+    "no_offload.avg_gpu_utilization": {
+      "policy": "no_offload",
+      "metric": "avg_gpu_utilization",
+      "mean": 0.9064,
+      "std": 0.0027,
+      "min": 0.9012,
+      "max": 0.9109,
+      "n": 8
+    },
+    "lru.avg_gpu_utilization": {
+      "policy": "lru",
+      "metric": "avg_gpu_utilization",
+      "mean": 0.9064,
+      "std": 0.0027,
+      "min": 0.9012,
+      "max": 0.9109,
+      "n": 8
+    },
+    "semantic.avg_gpu_utilization": {
+      "policy": "semantic",
+      "metric": "avg_gpu_utilization",
+      "mean": 0.9095,
+      "std": 0.0036,
+      "min": 0.9046,
+      "max": 0.9148,
+      "n": 8
+    },
+    "no_offload.eviction_accuracy": {
+      "policy": "no_offload",
+      "metric": "eviction_accuracy",
+      "mean": 0.4267,
+      "std": 0.0187,
+      "min": 0.406,
+      "max": 0.4653,
+      "n": 8
+    },
+    "lru.eviction_accuracy": {
+      "policy": "lru",
+      "metric": "eviction_accuracy",
+      "mean": 0.4267,
+      "std": 0.0187,
+      "min": 0.406,
+      "max": 0.4653,
+      "n": 8
+    },
+    "semantic.eviction_accuracy": {
+      "policy": "semantic",
+      "metric": "eviction_accuracy",
+      "mean": 0.4269,
+      "std": 0.0183,
+      "min": 0.4022,
+      "max": 0.4583,
+      "n": 8
+    },
+    "no_offload.total_cost_per_hour": {
+      "policy": "no_offload",
+      "metric": "total_cost_per_hour",
+      "mean": 7.0286,
+      "std": 0.0122,
+      "min": 7.0052,
+      "max": 7.0486,
+      "n": 8
+    },
+    "lru.total_cost_per_hour": {
+      "policy": "lru",
+      "metric": "total_cost_per_hour",
+      "mean": 8.5016,
+      "std": 0.0107,
+      "min": 8.4846,
+      "max": 8.5211,
+      "n": 8
+    },
+    "semantic.total_cost_per_hour": {
+      "policy": "semantic",
+      "metric": "total_cost_per_hour",
+      "mean": 8.5233,
+      "std": 0.0127,
+      "min": 8.4945,
+      "max": 8.5393,
+      "n": 8
+    },
+    "no_offload.cost_per_agent_hour": {
+      "policy": "no_offload",
+      "metric": "cost_per_agent_hour",
+      "mean": 1.1505,
+      "std": 0.0543,
+      "min": 1.0069,
+      "max": 1.1736,
+      "n": 8
+    },
+    "lru.cost_per_agent_hour": {
+      "policy": "lru",
+      "metric": "cost_per_agent_hour",
+      "mean": 0.17,
+      "std": 0.0002,
+      "min": 0.1697,
+      "max": 0.1704,
+      "n": 8
+    },
+    "semantic.cost_per_agent_hour": {
+      "policy": "semantic",
+      "metric": "cost_per_agent_hour",
+      "mean": 0.1705,
+      "std": 0.0003,
+      "min": 0.1699,
+      "max": 0.1708,
+      "n": 8
+    }
+  }
+}

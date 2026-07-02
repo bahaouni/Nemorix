@@ -1,0 +1,35 @@
+{
+  "agents": 50,
+  "hours": 24,
+  "seed": 42,
+  "results": {
+    "No offload (baseline)": {
+      "sla_agents": 0,
+      "avg_resume_latency_ms": 1205.33,
+      "p95_resume_latency_ms": 1578.9,
+      "p99_resume_latency_ms": 1638.1,
+      "cost_per_agent_hour": 1.1676
+    },
+    "LRU, no CXL  (GPU + RAM + SSD)": {
+      "sla_agents": 50,
+      "avg_resume_latency_ms": 37.22,
+      "p95_resume_latency_ms": 66.91,
+      "p99_resume_latency_ms": 71.52,
+      "cost_per_agent_hour": 0.1438
+    },
+    "LRU + CXL   (GPU + CXL + RAM + SSD)": {
+      "sla_agents": 50,
+      "avg_resume_latency_ms": 10.37,
+      "p95_resume_latency_ms": 14.62,
+      "p99_resume_latency_ms": 15.63,
+      "cost_per_agent_hour": 0.1697
+    },
+    "Nemorix + CXL (semantic, full hierarchy)": {
+      "sla_agents": 50,
+      "avg_resume_latency_ms": 9.88,
+      "p95_resume_latency_ms": 14.33,
+      "p99_resume_latency_ms": 15.63,
+      "cost_per_agent_hour": 0.1708
+    }
+  }
+}

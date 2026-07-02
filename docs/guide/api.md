@@ -5,76 +5,92 @@
 Manages allocation, migration, and eviction of KV-cache blocks across the four tiers.
 
 ```python
-from nemorix.core.tier_manager import MemoryTierManager, TierConfig
+from nemorix.core.tier_manager import MemoryTierManager
 
-manager = MemoryTierManager()
+manager = MemoryTierManager()   # defaults: 80 / 512 / 256 / 4000 GB
 ```
 
 ### Constructor
 
 ```python
-MemoryTierManager(tier_configs: dict[str, TierConfig] | None = None)
+MemoryTierManager(gpu_gb=80, cxl_gb=512, ram_gb=256, ssd_gb=4000)
 ```
 
-If `tier_configs` is omitted, uses defaults (H100 + Samsung CMM-D CXL + DDR5 + NVMe Gen4).
+Defaults model H100 HBM3 + Samsung CMM-D CXL + DDR5 + NVMe Gen4. Set `cxl_gb` to a
+tiny value (e.g. `0.001`) to disable the CXL tier for ablations.
 
 ### Methods
 
 ```python
-# Migrate a KV block from its current tier to target_tier
-# Returns the transfer latency in milliseconds
+# Migrate a KV block to target_tier (applies tier compression).
+# Returns the transfer latency in milliseconds.
 manager.migrate_block(block: KVBlock, target_tier: str) -> float
 
-# Ensure enough space exists in target_tier for n_bytes
-# Evicts blocks (calling the policy) if necessary
-manager.ensure_space(n_bytes: int, tier: str, policy: EvictionPolicy) -> None
+# Migrate all of an agent's blocks; returns on-demand resume latency (ms).
+manager.migrate_agent_blocks(blocks: list[KVBlock], target_tier: str) -> float
 
-# Get total cost per hour across all tiers
+# Evict blocks from a tier (via the policy) until required_bytes fit.
+# Returns the evicted blocks (cascaded to the next colder tier).
+manager.ensure_space(tier_name, required_bytes, all_blocks, policy, current_time) -> list[KVBlock]
+
+# Total storage cost per hour across all tiers.
 manager.total_cost_per_hour() -> float
 
-# Get current utilization fraction for a tier
-manager.utilization(tier: str) -> float  # 0.0 – 1.0
-
-# Get available space in bytes for a tier
-manager.available_bytes(tier: str) -> int
+# Access a single tier object for utilization / free space.
+tier = manager.get_tier("gpu")
+tier.utilization      # float 0.0-1.0
+tier.free_bytes       # int
 ```
 
 ---
 
 ## `AgentMemoryObject`
 
-Represents a single AI agent and all its KV-cache blocks.
+Represents a single AI agent and all its KV-cache blocks. In practice you create
+agents with `WorkloadGenerator`, which builds the per-layer `KVBlock` list for you:
+
+```python
+from nemorix.simulation.workload import WorkloadGenerator
+
+gen = WorkloadGenerator(seed=42)
+agent = gen.create_agent(
+    context_tokens=65_536,
+    priority=7,
+    activation_prob=0.10,
+)
+```
+
+You can also construct one directly (an empty `blocks` list is allowed):
 
 ```python
 from nemorix.core.agent import AgentMemoryObject
 
 agent = AgentMemoryObject(
     agent_id="my-agent",
+    priority=7,
     total_context_tokens=65_536,
     activation_probability=0.10,
-    priority=7,
 )
 ```
 
-### Constructor Parameters
+### Key Fields
 
-| Parameter | Type | Default | Description |
+| Field | Type | Default | Description |
 |---|---|---|---|
-| `agent_id` | `str` | required | Unique identifier |
-| `total_context_tokens` | `int` | required | Context window size |
+| `agent_id` | `str` | `""` | Unique identifier |
+| `blocks` | `list[KVBlock]` | `[]` | Per-layer KV-cache blocks |
+| `state` | `str` | `"suspended"` | `running` / `ready` / `sleeping` / `suspended` |
+| `priority` | `int` | `5` | 0 (highest) to 10 (lowest) |
+| `total_context_tokens` | `int` | `0` | Context window size |
 | `activation_probability` | `float` | `0.1` | Chance of activation per sim step |
-| `priority` | `int` | `5` | 1 (lowest) to 10 (highest) |
-| `num_layers` | `int` | `80` | Model layers (Llama-3-70B default) |
-| `num_kv_heads` | `int` | `8` | KV attention heads |
-| `head_dim` | `int` | `128` | Head dimension |
 
 ### Properties
 
 ```python
-agent.total_size_bytes    # int  — total KV-cache size across all blocks
-agent.primary_tier        # str  — 'gpu' | 'cxl' | 'ram' | 'ssd'
-agent.state               # str  — 'running' | 'sleeping' | 'suspended'
-agent.avg_resume_latency_ms  # float — rolling average over all resumes
+agent.total_size_bytes       # int   — total KV-cache size across all blocks
+agent.total_size_mb          # float — same, in MiB
+agent.primary_tier           # str   — 'gpu' | 'cxl' | 'ram' | 'ssd' | 'none'
+agent.avg_resume_latency_ms  # float — average over all recorded resumes
 ```
 
 ---
@@ -87,25 +103,29 @@ OS-style process scheduler for agent lifecycle management.
 from nemorix.core.scheduler import AgentScheduler
 from nemorix.policies.semantic import SemanticEvictionPolicy
 
-scheduler = AgentScheduler(
-    tier_manager=manager,
-    eviction_policy=SemanticEvictionPolicy(),
-    idle_threshold_secs=300,
-)
+scheduler = AgentScheduler(manager, SemanticEvictionPolicy())
+scheduler.register_agent(agent)
 ```
 
 ### Methods
 
 ```python
-# Activate an agent (loads blocks from current tier to GPU if not already there)
-# Returns resume latency in milliseconds
-scheduler.activate_agent(agent: AgentMemoryObject) -> float
+# Register an agent so the scheduler can manage it.
+scheduler.register_agent(agent: AgentMemoryObject) -> None
 
-# Mark agent as idle (triggers migration after idle_threshold_secs)
-scheduler.deactivate_agent(agent: AgentMemoryObject) -> None
+# Activate an agent by id (pages its blocks to GPU, evicting if needed).
+# Returns resume latency in milliseconds. Time is in seconds.
+scheduler.activate_agent(agent_id: str, current_time: float) -> float
 
-# Scan all agents; migrate those past idle threshold down the tier hierarchy
-scheduler.suspend_idle_agents(current_time_secs: float) -> None
+# Move an agent by id down to a colder tier ("cxl" | "ram" | "ssd").
+scheduler.deactivate_agent(agent_id: str, target_tier: str, current_time: float) -> None
+
+# Scan all running agents; demote those idle past the threshold. Returns count.
+scheduler.suspend_idle_agents(current_time: float, idle_threshold_s: float = 300.0) -> int
+
+# Introspection
+scheduler.get_running_count() -> int
+scheduler.get_state_counts() -> dict[str, int]
 ```
 
 ---
@@ -123,7 +143,7 @@ block = KVBlock(
     layer_idx=0,
     num_tokens=65_536,
     dtype="fp16",
-    attention_score=0.72,
+    importance_score=0.72,
 )
 ```
 
@@ -136,17 +156,18 @@ block = KVBlock(
 | `layer_idx` | `int` | Transformer layer index (0 = embedding-adjacent) |
 | `num_tokens` | `int` | Number of tokens represented |
 | `dtype` | `str` | `'fp16'` | `'fp8'` | `'int4'` |
-| `attention_score` | `float` | 0.0–1.0 — higher = block is more important |
+| `importance_score` | `float` | 0.0–1.0 — policy-agnostic importance (higher = keep) |
 | `last_accessed` | `float` | Unix timestamp of last access |
 | `tier` | `str` | Current tier: `'gpu'` \| `'cxl'` \| `'ram'` \| `'ssd'` |
 
-### Methods
+### Fields & Methods
 
 ```python
-block.size_bytes()             # int — current size in bytes
-block.compressed_size("fp8")  # int — projected size after compression
-block.compress_to("fp8")       # KVBlock — returns new block at target dtype
-block.copy()                   # KVBlock — deep copy
+block.size_bytes               # int   — current size in bytes (field; mutated on compress)
+block.size_mb                  # float — current size in MiB (property)
+block.compressed_size("fp8")  # int   — projected size after compression (no mutation)
+block.compress_to("fp8")       # None  — compress in place (updates size_bytes + dtype)
+block.copy()                   # KVBlock — copy with a fresh block_id
 ```
 
 ---

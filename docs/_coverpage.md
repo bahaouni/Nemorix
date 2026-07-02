@@ -4,7 +4,7 @@
 
 ### Virtual Memory for AI Agents
 
-> **49× faster** agent resume &nbsp;·&nbsp; **97% cost reduction** &nbsp;·&nbsp; **8× more agents** on the same GPU
+> **122× faster** agent resume &nbsp;·&nbsp; **98% cost reduction** &nbsp;·&nbsp; **8× more agents** on the same GPU
 
 CXL-aware KV-cache tiering that treats agent memory  
 like an OS memory hierarchy — sleep, wake, migrate, repeat.

@@ -77,26 +77,33 @@ prefetcher.step(agents, current_time, scheduler)
 
 ## Writing a Custom Policy
 
-Implement the `EvictionPolicy` protocol:
+Implement the `EvictionPolicy` protocol — it selects **KV blocks** (not agents)
+to evict until `required_bytes` are freed:
 
 ```python
 from typing import Protocol, List
-from nemorix.core.agent import AgentMemoryObject
+from nemorix.core.kv_block import KVBlock
 
 class EvictionPolicy(Protocol):
-    def select_eviction_candidate(
-        self, agents: List[AgentMemoryObject]
-    ) -> AgentMemoryObject:
-        """Return the agent that should be evicted next."""
+    def select_victims(
+        self, blocks: List[KVBlock], required_bytes: int, current_time: float
+    ) -> List[KVBlock]:
+        """Return the blocks to evict (in order) until required_bytes are freed."""
         ...
 ```
 
-Example — evict the agent with the largest KV-cache (to free the most VRAM):
+Example — evict the largest blocks first (free the most bytes per eviction):
 
 ```python
 class LargestFirstPolicy:
-    def select_eviction_candidate(self, agents):
-        return max(agents, key=lambda a: a.total_size_bytes)
+    def select_victims(self, blocks, required_bytes, current_time):
+        victims, freed = [], 0
+        for b in sorted(blocks, key=lambda b: b.size_bytes, reverse=True):
+            victims.append(b)
+            freed += b.size_bytes
+            if freed >= required_bytes:
+                break
+        return victims
 ```
 
 Pass your policy to the scheduler:
@@ -104,10 +111,7 @@ Pass your policy to the scheduler:
 ```python
 from nemorix.core.scheduler import AgentScheduler
 
-scheduler = AgentScheduler(
-    tier_manager=manager,
-    eviction_policy=LargestFirstPolicy(),
-)
+scheduler = AgentScheduler(manager, LargestFirstPolicy())
 ```
 
 ## Policy Comparison (50 agents, 24h)
@@ -115,8 +119,9 @@ scheduler = AgentScheduler(
 | Policy | SLA Agents | Avg Latency | P99 Latency | $/agent-hr |
 |---|---|---|---|---|
 | No Offload | 0 / 50 | 1,205 ms | 1,638 ms | $7.01 |
-| LRU | 47 / 50 | 148.5 ms | 285.8 ms | $0.16 |
-| **Semantic (Nemorix)** | **50 / 50** | **24.7 ms** | **38.6 ms** | **$0.21** |
+| LRU | 50 / 50 | 10.4 ms | 15.6 ms | $0.17 |
+| **Semantic (Nemorix)** | **50 / 50** | **9.9 ms** | **15.6 ms** | **$0.17** |
 
-Nemorix serves all 50 agents under the 200ms SLA because the semantic policy preferentially
-keeps agents in the CXL tier (25ms recall) instead of spilling them to SSD (230ms recall).
+At 50 agents, both LRU and semantic serve all agents under SLA. The semantic advantage
+emerges at 500+ agents when CXL saturates: Nemorix serves 4.2× more agents under SLA
+than LRU (273 vs 65) by preferentially keeping high-value agents in the CXL tier.

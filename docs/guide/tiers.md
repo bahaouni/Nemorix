@@ -68,21 +68,14 @@ Tier sizes are set via CLI flags or by editing `SimulationConfig` directly:
 python benchmarks/run_simulation.py --gpu-gb 80 --cxl-gb 1024 --ram-gb 512 --ssd-gb 8000
 
 # Inspect tier constants in code
-# src/nemorix/core/tier_manager.py → TIER_CONFIGS dict
+# src/nemorix/core/tier_manager.py → MemoryTierManager.__init__
 ```
 
 ```python
-from nemorix.core.tier_manager import MemoryTierManager, TierConfig
+from nemorix.core.tier_manager import MemoryTierManager
 
-# Create a manager with custom tier sizes
-manager = MemoryTierManager(
-    tier_configs={
-        "gpu":  TierConfig(capacity_gb=80,   bandwidth_gbps=3000, cost_per_gb_month=40.0),
-        "cxl":  TierConfig(capacity_gb=1024,  bandwidth_gbps=64,  cost_per_gb_month=4.0),
-        "ram":  TierConfig(capacity_gb=512,   bandwidth_gbps=50,  cost_per_gb_month=2.0),
-        "ssd":  TierConfig(capacity_gb=8000,  bandwidth_gbps=7,   cost_per_gb_month=0.10),
-    }
-)
+# Create a manager with custom tier capacities (GB)
+manager = MemoryTierManager(gpu_gb=80, cxl_gb=1024, ram_gb=512, ssd_gb=8000)
 ```
 
 ## Transfer Time Formula

@@ -17,11 +17,13 @@ def main():
     print("=" * 80)
     print()
 
-    agent_counts = [10, 25, 50, 75, 100]
+    agent_counts = [10, 25, 50, 75, 100, 200, 500]
 
     print(f"  {'Agents':>8}  {'Policy':>10}  {'SLA Agents':>11}  {'Avg(ms)':>9}  "
           f"{'P99(ms)':>9}  {'GPU Util':>9}  {'$/agent-hr':>11}")
     print("  " + "-" * 76)
+
+    all_results: dict[int, dict[str, object]] = {}
 
     for n_agents in agent_counts:
         config = SimulationConfig(
@@ -31,9 +33,11 @@ def main():
             seed=42,
         )
         runner = SimulationRunner(config)
+        all_results[n_agents] = {}
 
         for policy_name in ["no_offload", "lru", "semantic"]:
             m = runner.run(policy_name)
+            all_results[n_agents][policy_name] = m
             sla = m.sla_agents
             effective = sla if sla > 0 else m.max_concurrent_agents
             cost_per_agent = m.total_cost_per_hour / max(1, effective)
@@ -47,11 +51,21 @@ def main():
 
     print("=" * 80)
     print()
+
+    # Dynamic observations from actual results
+    max_agents = agent_counts[-1]
+    lru_max = all_results[max_agents]["lru"]
+    sem_max = all_results[max_agents]["semantic"]
+    no_max = all_results[max_agents]["no_offload"]
     print("Key Observations:")
-    print("  1. Nemorix serves 27% more agents under SLA than LRU at 100-agent scale")
-    print("  2. Avg resume latency: Nemorix is 5-10x faster than LRU across all scales")
-    print("  3. No-offload is GPU-only (~5-6 agents), all resumes >1s (recompute)")
-    print("  4. At 50 agents: Nemorix P99 = 39ms vs LRU P99 = 286ms (7x better)")
+    print(f"  1. At {max_agents} agents: Nemorix SLA={sem_max.sla_agents} vs LRU SLA={lru_max.sla_agents}")
+    if sem_max.avg_resume_latency_ms > 0 and lru_max.avg_resume_latency_ms > 0:
+        ratio = lru_max.avg_resume_latency_ms / sem_max.avg_resume_latency_ms
+        print(f"  2. Nemorix avg latency {sem_max.avg_resume_latency_ms:.1f}ms vs LRU {lru_max.avg_resume_latency_ms:.1f}ms ({ratio:.1f}x)")
+    if no_max.avg_resume_latency_ms > 0 and sem_max.avg_resume_latency_ms > 0:
+        ratio_no = no_max.avg_resume_latency_ms / sem_max.avg_resume_latency_ms
+        print(f"  3. vs No-offload: {ratio_no:.0f}x faster ({no_max.avg_resume_latency_ms:.0f}ms -> {sem_max.avg_resume_latency_ms:.1f}ms)")
+    print(f"  4. CXL tier is the key enabler: both LRU+CXL and Semantic+CXL >> No-offload")
     print()
 
 

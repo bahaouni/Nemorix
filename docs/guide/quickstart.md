@@ -40,47 +40,44 @@ This runs a 24-hour simulation with 50 AI agents and prints a comparison table:
 ```
   Metric                         No Offload        LRU      Nemorix
   ─────────────────────────────────────────────────────────────────
-  Agents under SLA (<200ms)               0         47         50
+  Agents under SLA (<200ms)               0         50         50
   Max GPU-resident agents                 6          6          6
-  Avg resume latency               1205.3ms      148.5ms    24.7ms
-  P50 resume latency               1279.3ms      178.7ms    24.9ms
-  P99 resume latency               1638.1ms      285.8ms    38.6ms
+  Avg resume latency               1205.5ms      10.4ms      9.9ms
+  P50 resume latency               1279.3ms      10.0ms      9.6ms
+  P99 resume latency               1638.1ms      15.6ms     15.6ms
   GPU utilization                       90%        90%        91%
   Eviction accuracy                     N/A        42%        41%
-  Cost per agent-hour (incl. GPU)     $7.01       $0.16      $0.21
+  Cost per agent-hour (incl. GPU)     $7.01       $0.17      $0.17
 ```
 
 ## 4. Use the Python API
 
 ```python
-from nemorix.core.tier_manager import MemoryTierManager, TierConfig
-from nemorix.core.agent import AgentMemoryObject
+from nemorix.core.tier_manager import MemoryTierManager
 from nemorix.core.scheduler import AgentScheduler
 from nemorix.policies.semantic import SemanticEvictionPolicy
+from nemorix.simulation.workload import WorkloadGenerator
 
-# Create the tier manager (uses defaults matching H100 + CXL + DDR5 + NVMe)
+# Create the tier manager (defaults match H100 + CXL + DDR5 + NVMe)
 manager = MemoryTierManager()
+policy = SemanticEvictionPolicy()
+scheduler = AgentScheduler(manager, policy)
 
-# Create an agent
-agent = AgentMemoryObject(
-    agent_id="agent-001",
-    total_context_tokens=32_768,   # 32K tokens
-    activation_probability=0.1,    # 10% chance active per step
-    priority=5,                    # 1–10 scale
+# Build an agent with its per-layer KV blocks
+agent = WorkloadGenerator(seed=42).create_agent(
+    context_tokens=32_768,    # 32K tokens
+    priority=5,               # 0 (highest) - 10 (lowest)
+    activation_prob=0.1,      # 10% chance active per step
 )
+policy.set_agent_priority(agent.agent_id, agent.priority)
+scheduler.register_agent(agent)
 
-# Scheduler manages sleep/wake lifecycle
-scheduler = AgentScheduler(
-    tier_manager=manager,
-    eviction_policy=SemanticEvictionPolicy(),
-)
-
-# Activate the agent (loads from wherever it lives)
-latency_ms = scheduler.activate_agent(agent)
+# Activate the agent (pages blocks to GPU). Time is in seconds.
+latency_ms = scheduler.activate_agent(agent.agent_id, current_time=0.0)
 print(f"Agent resumed in {latency_ms:.1f} ms")
 
-# When done for now, deactivate (starts migration to CXL)
-scheduler.deactivate_agent(agent)
+# When done for now, demote it to CXL
+scheduler.deactivate_agent(agent.agent_id, "cxl", current_time=60.0)
 ```
 
 ## 5. Run the Policy Sweep

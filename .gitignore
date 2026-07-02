@@ -54,6 +54,13 @@ desktop.ini
 benchmarks/*.png
 benchmarks/*.pdf
 
+# Node / JS build artifacts
+node_modules/
+presentation/node_modules/
+presentation/dist/
+presentation/.vite/
+*.log
+
 # Jupyter
 .ipynb_checkpoints/
 DOCUMENTATION.md
@@ -61,3 +68,6 @@ HONEST_ASSESSMENT.md
 NEXT_LEVEL.md
 SKILLS.md
 SUBMISSION.md
+TECHNICAL_GUIDE.md
+MARKET_RESEARCH.md
+HOW_SIMULATION_WORKS.md
