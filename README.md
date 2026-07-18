@@ -144,51 +144,6 @@ The Retention Law is a heuristic, not a proof of optimality. Density ordering is
 fractional knapsack, but KV blocks are indivisible. A sensitivity/term-ablation harness exists,
 but its full post-calibration run and real-trace validation remain required.
 
-## Publication Readiness and Venue Plan
-
-The artifact now contains a minimal measured tensor-transfer prototype in addition to the
-simulation, but it is not yet competitive as a full paper at a top systems or ML venue. The main
-blocker is end-to-end integration and real workload/hardware validation. See the
-[runtime prototype guide](docs/guide/runtime-prototype.md) for the exact implementation boundary.
-
-| Venue | Verified deadline | Fit | Current recommendation |
-|---|---:|---|---|
-| [NeurIPS 2026 main track](https://neurips.cc/Conferences/2026/Dates) | Full paper May 6, 2026 AoE — closed | Weak-to-moderate; systems work needs stronger ML insight and real evaluation | Do not target the main track in the current form |
-| [NeurIPS 2026 workshops](https://neurips.cc/Conferences/2026/Dates) | Suggested contribution date Aug. 29, 2026; each workshop sets its own CFP | Possible for a short position/design paper if a systems-for-ML workshop is announced | Monitor individual workshop CFPs; disclose simulation-only status |
-| [ASPLOS 2027, September cycle](https://www.asplos-conference.org/asplos2027/cfp/) | Full paper Sept. 9, 2026 AoE | Strong architecture/OS/memory fit | Best near-term full-paper target only after substantial validation |
-| [OSDI 2027](https://www.usenix.org/conference/osdi27/call-for-papers) | Abstract Dec. 1; paper Dec. 8, 2026 | Strong systems-for-ML fit | Better long-term target after a practical implementation and measurements |
-| MLSys / EuroSys future cycles | CFP not verified here | Strong potential fit | Monitor official CFPs; do not plan around unofficial dates |
-
-ASPLOS requires double-blind `acmart` format and an 11-page main body, and explicitly asks authors
-to disclose what is and is not implemented. It also requires disclosure of generative-AI use under
-ACM policy. OSDI uses double-blind review and a 12-page main body; its CFP requires demonstrated
-practicality and prohibits simultaneous submission. Always re-check the official CFP before filing.
-
-### Submission blockers
-
-- Complete a version-pinned vLLM connector and measure end-to-end model resume latency.
-- Measure at least H100 ↔ host RAM/NVMe; add physical CXL measurements when access is available.
-- Validate the first-eight-layer overlap assumption and model bus contention/concurrent wakes.
-- Replace IID Bernoulli activations with real or defensible bursty/diurnal agent traces.
-- Replace synthetic importance with measured model/application signals and evaluate task quality.
-- Add multi-seed saturated scaling, policy-term ablations, confidence intervals, and overhead.
-- Compare against current CPU/SSD offload and KV-reuse systems, not only No-Offload and LRU.
-- Evaluate multiple model sizes, context lengths, SLA thresholds, and CXL bandwidth/capacity points.
-- Convert references to complete venue-quality entries with DOI/URLs and verify every factual claim.
-
-### Final submission checklist
-
-- Anonymize authors, affiliations, PDF metadata, repository, acknowledgments, and project identity.
-- Convert to the venue template and satisfy page, font, figure, and accessibility requirements.
-- Keep implemented, analytically modeled, and future-work claims visibly separated.
-- Archive scripts, seeds, environments, raw JSON, and figure-generation commands.
-- Add required AI-use disclosure and human-subject/data statements where applicable.
-- Confirm originality, resubmission, conflict-of-interest, and concurrent-submission rules.
-
-See [VALIDATION_PLAN.md](VALIDATION_PLAN.md) for the hardware access plan and
-[PAPER_SUBMISSION.tex](PAPER_SUBMISSION.tex) for the current manuscript. For a complete
-technical walkthrough, A100 setup, benchmark interpretation, and continuation roadmap, read
-[START_HERE/RUNTIME_LEARNING_README.md](START_HERE/RUNTIME_LEARNING_README.md).
 
 ## License
 
