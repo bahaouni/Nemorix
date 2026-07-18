@@ -20,9 +20,9 @@ make programs think they have more RAM than physically exists:
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  GPU VRAM      80 GB   3,000 GB/s   $40/GB/mo  (active) │
-│  CXL Memory  512 GB      64 GB/s    $4/GB/mo   (ready)  │
-│  CPU RAM     256 GB      50 GB/s    $2/GB/mo   (sleeping)│
-│  NVMe SSD     4 TB        7 GB/s   $0.10/GB/mo (cold)   │
+│  CXL Memory  512 GB      36 GB/s    ~$4/GB/mo  (ready)  │
+│  CPU RAM     256 GB      50 GB/s    ~$2/GB/mo  (sleeping)│
+│  NVMe SSD     4 TB        7 GB/s  ~$0.10/GB/mo (cold)   │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -35,12 +35,14 @@ When it wakes up, Nemorix fetches just the layers it needs first — so inferenc
 | Metric | Without Nemorix | With Nemorix |
 |---|---|---|
 | Agents under 200ms SLA | **0** out of 50 | **50** out of 50 |
-| Average resume latency | 1,205 ms | **9.9 ms** |
-| P99 resume latency | 1,638 ms | **15.6 ms** |
+| Mean resume latency (8 seeds) | 1,151 ± 42 ms | **15.6 ± 0.5 ms** |
+| P99 resume latency | 1,638 ms | **27.8 ms** |
 | Cost per agent-hour | $7.01 | **$0.17** |
+| SLA agents at 500 fleet | 0 | **276 (vs 63 for LRU: 4.4×, seed 42)** |
 
-> All results from a deterministic simulation (seed=42, 50 agents, 64K tokens, 24h).
-> Reproduce with: `python benchmarks/run_simulation.py`
+> All results from a deterministic simulation (8 seeds 42–49, 50 agents, 64K tokens, 24h).
+> Reproduce with: `python benchmarks/run_robustness.py --seeds 8`
+> CXL bandwidth: 36 GB/s (Samsung CMM-D measured). Costs are market estimates.
 
 ## What Makes It Different
 

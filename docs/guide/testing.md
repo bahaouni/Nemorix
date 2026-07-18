@@ -25,7 +25,7 @@ python -m pytest tests/ -v
 ```python
 def test_cxl_bandwidth_1gib_block():
     """
-    CXL bandwidth: 64 GB/s (Samsung CMM-D CXL 2.0 PCIe 5.0 x16 datasheet)
+    CXL bandwidth: 36 GB/s (Samsung CMM-D measured sequential read)
     Transfer of 1 GiB should take: 1 / 64 * 1000 + 0.005 = 15.630 ms
     """
     block = KVBlock(..., size_bytes=1024**3)

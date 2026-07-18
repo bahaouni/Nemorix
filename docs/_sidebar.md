@@ -15,6 +15,7 @@
   * [CLI Reference](guide/cli.md)
   * [Python API](guide/api.md)
   * [Simulation Runner](guide/simulation.md)
+  * [Measured Runtime Prototype](guide/runtime-prototype.md)
 
 * **Benchmarks**
   * [Results & Numbers](guide/benchmarks.md)

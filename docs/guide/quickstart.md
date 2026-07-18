@@ -41,12 +41,12 @@ This runs a 24-hour simulation with 50 AI agents and prints a comparison table:
   Metric                         No Offload        LRU      Nemorix
   ─────────────────────────────────────────────────────────────────
   Agents under SLA (<200ms)               0         50         50
-  Max GPU-resident agents                 6          6          6
-  Avg resume latency               1205.5ms      10.4ms      9.9ms
-  P50 resume latency               1279.3ms      10.0ms      9.6ms
-  P99 resume latency               1638.1ms      15.6ms     15.6ms
-  GPU utilization                       90%        90%        91%
-  Eviction accuracy                     N/A        42%        41%
+  Max GPU-resident agents                 6          6          7
+  Avg resume latency              1205.5ms      16.8ms     16.2ms
+  P50 resume latency              1279.3ms      17.4ms     19.4ms
+  P99 resume latency              1638.1ms      27.8ms     27.8ms
+  GPU utilization                       90%        90%        92%
+  Eviction accuracy                     N/A        42%        40%
   Cost per agent-hour (incl. GPU)     $7.01       $0.17      $0.17
 ```
 

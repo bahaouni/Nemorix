@@ -5,12 +5,9 @@ Nemorix manages agent KV-cache across four hardware tiers, each with different l
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  TIER 1 — GPU VRAM       80 GB    1 µs   3,000 GB/s   $40/GB/mo (HBM3) │
-│  TIER 2 — CXL Memory    512 GB    5 µs      64 GB/s    $4/GB/mo        │
-│  TIER 3 — CPU RAM       256 GB   10 µs      50 GB/s    $2/GB/mo (DDR5) │
-│  TIER 4 — NVMe SSD       4 TB   100 µs       7 GB/s   $0.10/GB/mo      │
-└─────────────────────────────────────────────────────────────────────────┘
-           ← fastest, smallest, most expensive
-                                      cheapest, largest, slowest →
+│  TIER 2 — CXL Memory    512 GB    5 µs      36 GB/s   ~$4/GB/mo        │
+│  TIER 3 — CPU RAM       256 GB   10 µs      50 GB/s   ~$2/GB/mo (DDR5) │
+│  TIER 4 — NVMe SSD       4 TB   100 µs       7 GB/s  ~$0.10/GB/mo      │
 ```
 
 ## Tier Details
@@ -24,14 +21,19 @@ Nemorix manages agent KV-cache across four hardware tiers, each with different l
 
 ### Tier 2 — CXL Memory (the key innovation)
 
-- **Hardware:** Samsung CMM-D, SK Hynix Type-3 (CXL 2.0, PCIe 5.0 x16)
-- **Bandwidth:** 64 GB/s unidirectional read (source: Samsung CMM-D datasheet)
+- **Hardware:** Samsung CMM-D (MD220), SK Hynix Type-3 (CXL 2.0, PCIe 5.0 x16)
+- **Bandwidth:** 36 GB/s measured sequential read (Samsung CMM-D specification)
 - **Latency:** ~5 µs base + transfer time
-- **Role:** "Warm" tier for agents idle for 5–10 minutes. Fastest recall after GPU.
-- **Resume latency:** ~25 ms average for a 32–64K agent (on-demand partial load)
-- **Cost:** $4/GB/month — 10× cheaper than HBM, 40× more expensive than SSD
+- **Role:** “Warm” tier for agents idle for 5–10 minutes. Fastest recall after GPU.
+- **Resume latency:** ~16 ms average for a 32–64K agent (on-demand partial load, FP8)
+- **Cost:** ~$4/GB/month — 10× cheaper than HBM, 40× more expensive than SSD
 
-> **Why CXL matters:** No other KV-cache system uses CXL. It's the natural first tier below GPU VRAM — fast enough for sub-100ms recall, cheap enough to pool large amounts of agent state. This is Nemorix's primary hardware differentiator.
+> **Why CXL matters:** CXL’s primary contribution is **capacity**, not raw bandwidth.
+> Its 512 GB pool prevents agents from spilling to NVMe (230 ms recall), which is what
+> keeps all 50 agents under the 200 ms SLA. The 2.2× latency improvement over a
+> RAM-only hierarchy comes from avoiding that SSD overflow — not because 36 GB/s
+> beats DDR5’s 50 GB/s for sequential reads (it doesn’t). This is Nemorix’s primary
+> hardware differentiator: no other KV-cache system uses CXL as a managed tier.
 
 ### Tier 3 — CPU RAM
 
@@ -88,8 +90,8 @@ latency_ms = (bytes / bandwidth_bytes_per_s) × 1000 + base_latency_ms
 
 For a 1 GiB block:
 - **GPU ↔ GPU:** 0.3 ms (3,000 GB/s)
-- **CXL read:** 15.6 ms (64 GB/s)
+- **CXL read:** 27.8 ms (36 GB/s, Samsung CMM-D measured)
 - **RAM read:** 20.0 ms (50 GB/s)
 - **SSD read:** 143.0 ms (7 GB/s)
 
-These values are validated by `tests/test_tier_manager.py::test_transfer_time`.
+These values are validated by `tests/test_accuracy.py::test_cxl_transfer_time_36gbps`.

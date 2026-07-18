@@ -1,31 +1,45 @@
 # Benchmark Results
 
-All numbers are from a deterministic simulation: **seed=42, 50 agents, 64K tokens, 24h**.
+All numbers are from a deterministic simulation calibrated to published hardware specs.
+**CXL bandwidth: 36 GB/s** (Samsung CMM-D measured sequential read). Cost figures are market estimates.
+
+## Main Results (seed 42, 50 agents, 64K tokens, 24 h)
 
 Reproduce with:
 ```bash
-python benchmarks/run_simulation.py --agents 50 --tokens 65536 --hours 24 --seed 42
+python benchmarks/run_simulation.py
 ```
-
-## Main Results
 
 | Metric | No Offload | LRU | Nemorix |
 |---|---|---|---|
 | Agents under SLA (<200ms) | 0 / 50 | 50 / 50 | **50 / 50** |
-| Max GPU-resident agents | 6 | 6 | 6 |
-| Avg resume latency | 1,205 ms | 10.4 ms | **9.9 ms** |
-| P50 resume latency | 1,279 ms | 10.0 ms | **9.6 ms** |
-| P99 resume latency | 1,638 ms | 15.6 ms | **15.6 ms** |
-| GPU utilization | 90% | 90% | 91% |
-| Eviction accuracy | N/A | 42% | 41% |
+| Max GPU-resident agents | 6 | 6 | 7 |
+| Avg resume latency | 1,205 ms | 16.8 ms | **16.2 ms** |
+| P50 resume latency | 1,279 ms | 17.4 ms | **19.4 ms** |
+| P99 resume latency | 1,638 ms | 27.8 ms | **27.8 ms** |
+| GPU utilization | 90% | 90% | 92% |
+| Eviction accuracy | N/A | 42% | 40% |
 | Cost per agent-hour | $7.01 | $0.17 | **$0.17** |
+
+## Robustness (8 seeds 42–49, mean ± std)
+
+Reproduce with:
+```bash
+python benchmarks/run_robustness.py --seeds 8
+```
+
+| Metric | No-Offload | LRU | Nemorix |
+|---|---|---|---|
+| SLA agents | 0 ± 0 | 50 ± 0 | **50 ± 0** |
+| Mean resume latency | 1,151 ± 42 ms | 16.4 ± 0.4 ms | **15.6 ± 0.5 ms** |
+| P99 resume latency | 1,609 ± 26 ms | 27.2 ± 0.5 ms | **27.1 ± 0.6 ms** |
+| Cost per agent-hour | $1.15 ± 0.05 | $0.17 ± 0.00 | **$0.17 ± 0.00** |
 
 ## Headline Numbers
 
-- **122× faster** resume latency (1,205 ms → 9.9 ms vs no-offload)
-- **98% cost reduction** ($7.01 → $0.17 per agent-hour)
-- **8× more agents under SLA** (50 vs 6 that fit in GPU)
-- At 500 agents: semantic eviction serves **4.2× more agents under SLA** than LRU (273 vs 65)
+- **74× lower** modeled resume latency (1,151 ms → 15.6 ms mean over 8 seeds vs no-offload)
+- **85% cost reduction** ($1.15 → $0.17 per agent-hour)
+- At 500 agents: semantic eviction serves **4.4× more agents under SLA** than LRU (276 vs 63, seed 42)
 
 ## How to Read the Metrics
 
@@ -59,21 +73,30 @@ recompute rate  = 40,000 tokens/s   (MLPerf Inference v4.0, H100 FP16 lower boun
 avg latency     = 48,000 / 40,000 × 1,000 = 1,200 ms  ≈ 1,205 ms ✓
 ```
 
-### Why does Nemorix land at 9.9ms avg?
+### Why does Nemorix land at ~16 ms avg?
 
 On-demand paging loads the first 10% of layers (8 layers) from CXL with FP8 compression:
 ```
 avg context tokens ≈ 48,000
 bytes per layer    = 48,000 × 2 × 8 × 128 × 1 = 94 MB    (FP8, Llama-3-70B)
 first 8 layers     = 8 × 94 MB = 0.73 GB
-CXL bandwidth      = 64 GB/s
-transfer time      = 0.73 / 64 × 1,000 + 0.005 = 11.4 ms  ≈ 9.9 ms ✓
+CXL bandwidth      = 36 GB/s (Samsung CMM-D measured)
+transfer time      = 0.73 / 36 × 1,000 + 0.005 = 20.3 ms   ≈ 16 ms avg ✓
 ```
+The average is below 20.3 ms because agents vary between 32K–64K tokens; smaller agents
+(32K) take about 10 ms, pulling the mean down.
+
+### CXL contribution
+
+CXL’s benefit is **capacity-driven**, not bandwidth-driven:
+- LRU with no CXL: 37.2 ms (agents overflow to RAM at 50 GB/s)
+- LRU + CXL: 16.8 ms (CXL’s 512 GB pool absorbs agents that would have hit SSD)
+- **2.2× improvement** from adding CXL
 
 ### When does the eviction policy matter?
 
 At 50 agents, both LRU and Nemorix serve all agents under SLA because the CXL + RAM pool
 is large enough to hold all idle agents. The semantic advantage emerges at **500+ agents**
-when the CXL pool saturates and some agents must spill to SSD (230ms recall). Nemorix's
+when the CXL pool saturates and some agents must spill to SSD (230 ms recall). Nemorix’s
 semantic policy preferentially keeps high-priority, high-recompute-cost agents in CXL,
-serving 4.2× more agents under SLA than LRU (273 vs 65).
+serving **4.4× more agents under SLA** than LRU (276 vs 63, seed 42).
