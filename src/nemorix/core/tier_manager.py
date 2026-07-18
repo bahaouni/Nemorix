@@ -59,10 +59,11 @@ class MemoryTierManager:
 
     # Hardware reference specs (May 2026 pricing, H100 SXM5 + CXL 2.0 ecosystem)
     # GPU  : NVIDIA H100 SXM5 HBM3, 3350 GB/s (modeled at 3000 GB/s conservative)
-    # CXL  : Samsung CMM-D / SK Hynix Type-3, PCIe 5.0 x16, ~64 GB/s unidirectional read
+    # CXL  : Samsung CMM-D (MD220) CXL 2.0 Type-3, measured ~36 GB/s sequential read
+    #        (PCIe 5.0 x16 raw is ~63 GB/s; CXL protocol overhead + controller limits → 36)
     # RAM  : Host DDR5 via PCIe 5.0 bridge, ~50 GB/s from GPU perspective
     # SSD  : NVMe PCIe Gen4 x4, ~7 GB/s sequential read (Samsung 990 Pro class)
-    # Costs: H100 spot ~$3/hr; CXL DRAM $4/GB/mo; DDR5 $2/GB/mo; NVMe $0.10/GB/mo
+    # Costs: H100 spot ~$3/hr; CXL DRAM ~$4/GB/mo; DDR5 ~$2/GB/mo; NVMe ~$0.10/GB/mo
     def __init__(
         self,
         gpu_gb: float = 80,
@@ -74,7 +75,7 @@ class MemoryTierManager:
         self.tiers: dict[str, MemoryTier] = {
             # latency_us, bandwidth_gbps, cost_per_gb_month
             "gpu": MemoryTier("gpu", int(gpu_gb * GB), 1.0, 3000.0, 40.0, "fp16"),
-            "cxl": MemoryTier("cxl", int(cxl_gb * GB), 5.0, 64.0, 4.0, "fp8"),
+            "cxl": MemoryTier("cxl", int(cxl_gb * GB), 5.0, 36.0, 4.0, "fp8"),
             "ram": MemoryTier("ram", int(ram_gb * GB), 10.0, 50.0, 2.0, "int4"),
             "ssd": MemoryTier("ssd", int(ssd_gb * GB), 100.0, 7.0, 0.10, "int4"),
         }

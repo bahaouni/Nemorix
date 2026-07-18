@@ -1,27 +1,23 @@
 """Semantic-aware eviction policy -- Nemorix's core innovation.
 
-This module implements the **Nemorix Retention Law**: a forward-looking,
-Belady-approximating, knapsack-optimal, tier-aware eviction policy for
+This module implements the **Nemorix Retention Law**: an adaptive,
+Belady-inspired, value-density, tier-aware eviction heuristic for
 agent KV-cache.
 
 Theoretical foundations
 -----------------------
 1. **Belady's optimal (MIN, 1966)** evicts the block referenced *farthest in
    the future*. It is provably optimal but un-implementable online (needs an
-   oracle). We approximate the oracle with a *renewal-theoretic wake hazard*:
-   instead of "time since last use" (LRU, backward-looking) we estimate
-   "probability the agent is needed soon" (forward-looking).
+    oracle). We use an agent-specific renewal-timescale recency decay as an
+    online surrogate. It is not an estimator of Belady's exact next-use time.
 
-2. **Renewal theory** -- each agent alternates active/idle. Modelling idle
-   spells with a characteristic mean mu_a, the survival probability that an
-   agent stays idle for at least tau more is exp(-tau / mu_a). We *learn* mu_a
-   online per agent (EWMA of observed idle intervals), so the policy adapts to
-   bursty vs. steady agents.
+2. **Renewal-timescale recency** -- each agent alternates active/idle. We use
+    exp(-tau / mu_a) as a recency-retention kernel, where tau is elapsed idle
+    time and mu_a is learned online by EWMA of inter-activation intervals.
 
-3. **Knapsack value-density** -- eviction must free B bytes while losing the
-   least total value. The optimal greedy rule for the fractional knapsack is to
-   drop items in ascending **value-per-byte**, not ascending value. We therefore
-   evict by *retention value divided by size*.
+3. **Knapsack-inspired value-density** -- eviction must free B bytes while
+    losing little retained value. Ascending **value-per-byte** is optimal for
+    fractional knapsack and is used here as a heuristic for indivisible blocks.
 
 4. **Pressure gating** -- under light memory pressure the cheap LRU rule is
    near-optimal; the semantic machinery only pays off when the hierarchy is
@@ -52,12 +48,12 @@ from nemorix.core.kv_block import KVBlock
 # Reference reload path (used by the tier-aware reload term). When a block is
 # pushed off the GPU it lands on the next colder tier; bringing it back costs
 # size/bandwidth + base latency. Defaults model the Nemorix hierarchy.
-_TIER_BW_GBPS = {"gpu": 3000.0, "cxl": 64.0, "ram": 50.0, "ssd": 7.0}
+_TIER_BW_GBPS = {"gpu": 3000.0, "cxl": 36.0, "ram": 50.0, "ssd": 7.0}
 _TIER_LAT_US = {"gpu": 1.0, "cxl": 5.0, "ram": 10.0, "ssd": 100.0}
 
 
 class SemanticEvictionPolicy:
-    """Forward-looking, knapsack-optimal, tier-aware KV-cache eviction.
+    """Adaptive, value-density, tier-aware KV-cache eviction heuristic.
 
     Backward-compatible drop-in for the original 4-factor policy: the four
     weights ``w_recency``/``w_importance``/``w_priority``/``w_recompute`` are
@@ -107,7 +103,7 @@ class SemanticEvictionPolicy:
         self._sink_boost = sink_boost
 
         # --- tier-aware reload term ----------------------------------------
-        self._reload_bw = _TIER_BW_GBPS.get(reload_tier, 64.0)
+        self._reload_bw = _TIER_BW_GBPS.get(reload_tier, 36.0)
         self._reload_lat_us = _TIER_LAT_US.get(reload_tier, 5.0)
         self._reload_weight = reload_weight
         self._sla_ms = sla_ms
@@ -142,7 +138,8 @@ class SemanticEvictionPolicy:
 
         Replaces naive recency. tau = idle time; mu_a = learned mean idle
         period. H = exp(-tau / mu_a). Just-accessed -> 1; long-idle -> 0.
-        This is the forward-looking, Belady-approximating term.
+        This is an agent-timescale recency surrogate inspired by next-use
+        reasoning; it is not a calibrated probability of imminent reuse.
         """
         tau = max(0.0, current_time - block.last_accessed)
         mu = self.agent_idle_mean.get(block.agent_id, self._idle_mean_default)
@@ -205,8 +202,9 @@ class SemanticEvictionPolicy:
     ) -> float:
         """CVD(b): retention value per byte, pressure-gated toward LRU.
 
-        * Knapsack denominator -- dividing by size makes eviction free the most
-          bytes while shedding the least value (fractional-knapsack optimal).
+                * Knapsack-inspired denominator -- dividing by size favors freeing more
+                    bytes per unit of estimated retained value. The greedy rule is exact
+                    only for fractional knapsack, not indivisible KV blocks.
         * Pressure gate -- at low pressure (rho->0) we fall back to a pure
           recency (LRU) ranking which is cheaper and near-optimal; at high
           pressure (rho->1) we use the full value-density ranking.
@@ -236,8 +234,8 @@ class SemanticEvictionPolicy:
     ) -> List[KVBlock]:
         """Pick the lowest-value-density blocks until ``required_bytes`` freed.
 
-        Greedy fractional-knapsack: evict ascending Cognitive Value Density so
-        the bytes we give up carry the least retained value.
+        Greedy value-density heuristic: evict ascending Cognitive Value Density
+        until enough indivisible KV blocks have been selected.
         """
         rho = 1.0 if pressure is None else pressure
         scored = [

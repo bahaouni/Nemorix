@@ -146,9 +146,10 @@ def test_nemorix_sla_geq_lru_sla():
 def test_nemorix_avg_latency_lt_lru():
     """Nemorix average resume latency must be strictly lower than LRU.
 
-    CXL (64 GB/s) is faster than RAM (50 GB/s) and much faster than SSD (7 GB/s).
+    CXL (36 GB/s) adds capacity despite lower raw bandwidth than modeled RAM
+    (50 GB/s), and both are much faster than SSD (7 GB/s).
     With 50 agents, some LRU agents overflow to SSD (~143ms/GB), pulling up the average.
-    Nemorix keeps all idle agents in CXL (~25ms/GB), maintaining a lower average.
+    Nemorix keeps all idle agents in CXL (~28ms/GB), maintaining a lower average.
     """
     results = _run_all(FULL_CFG)
     sem_lat = results["semantic"].avg_resume_latency_ms

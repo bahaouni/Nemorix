@@ -6,7 +6,7 @@ classes of evidence a reviewer / jury needs to believe the formula is
 *correct* and *good*, not lucky -- and it is scrupulously honest about what
 Belady's optimal does and does not bound.
 
-  PROOF A -- Optimality gap vs Belady's MIN (1966).
+    STUDY A -- Comparison with Belady's MIN (1966).
             Belady minimizes CACHE MISSES and is the textbook optimum for
             *hit rate*. We therefore compare on eviction accuracy (the
             hit-rate-aligned metric). Nemorix closing most of the LRU->Belady
@@ -19,14 +19,14 @@ Belady's optimal does and does not bound.
             ignores. That gap is precisely the value added by the salience,
             priority, and knapsack/tier terms.
 
-  PROOF B -- Ablation. Zero each retention term in turn (renormalize the rest).
+    STUDY B -- Ablation. Zero each retention term in turn (renormalize the rest).
             Every removal hurting SLA proves each term is load-bearing -- the
             data answer to "isn't this just weighted LRU?".
 
   PROOF C -- Statistical significance. Many seeds, mean +/- 95% CI, Welch t.
             Non-overlapping CIs => the win is real, not a lucky seed.
 
-  PROOF D -- Weight robustness. Perturb each weight +/-50%; the SLA win over
+    STUDY D -- Weight robustness. Perturb each weight +/-50%; the SLA win over
             LRU must survive, proving we did not hand-tune a fragile config.
 
 Run:
@@ -100,7 +100,7 @@ def _renorm(weights: dict) -> dict:
 # =====================================================================
 def proof_a_optimality_gap():
     print("=" * 78)
-    print("  PROOF A -- Optimality gap vs Belady's MIN (the textbook optimum)")
+    print("  STUDY A -- Comparison with Belady's MIN (miss-optimal baseline)")
     print("=" * 78)
     print("  Belady minimizes MISSES => compare on eviction accuracy (hit-rate")
     print("  aligned). Efficiency = (Nemorix - LRU)/(Belady - LRU) in [0,1].")
@@ -144,10 +144,10 @@ def proof_a_optimality_gap():
 # =====================================================================
 def proof_b_ablation():
     print("=" * 78)
-    print("  PROOF B -- Ablation: does every retention term earn its place?")
+    print("  STUDY B -- Ablation: does every retention term earn its place?")
     print("=" * 78)
-    print("  Remove one term (weight -> 0, renormalize). An SLA drop proves the")
-    print("  term is load-bearing, not decoration.\n")
+    print("  Remove one term (weight -> 0, renormalize). An SLA drop indicates")
+    print("  that the term helps under this synthetic workload.\n")
 
     base = {"w_recency": 0.25, "w_importance": 0.30,
             "w_priority": 0.20, "w_recompute": 0.25}
@@ -184,9 +184,9 @@ def proof_b_ablation():
 # =====================================================================
 def proof_c_significance():
     print("=" * 78)
-    print("  PROOF C -- Statistical significance (Nemorix vs LRU on SLA)")
+    print("  STUDY C -- Across-seed separation (Nemorix vs LRU on SLA)")
     print("=" * 78)
-    print(f"  {len(SEEDS)} seeds. Non-overlapping 95% CIs => the win is real.\n")
+    print(f"  {len(SEEDS)} seeds. Report approximate 95% CIs and a Welch t statistic.\n")
 
     lru = [float(_run("lru", s).sla_agents) for s in SEEDS]
     sem = [float(_run("semantic", s).sla_agents) for s in SEEDS]
@@ -209,10 +209,9 @@ def proof_c_significance():
 # =====================================================================
 def proof_d_robustness():
     print("=" * 78)
-    print("  PROOF D -- Weight robustness (+/-50% perturbation)")
+    print("  STUDY D -- Weight sensitivity (+/-50% perturbation)")
     print("=" * 78)
-    print("  Perturb each weight, renormalize; the SLA win must survive =>")
-    print("  not hand-tuned to one fragile configuration.\n")
+    print("  Perturb each weight and renormalize to test local sensitivity.\n")
 
     lm = _mean([float(_run("lru", s).sla_agents) for s in SEEDS])
     base = {"w_recency": 0.25, "w_importance": 0.30,
@@ -237,8 +236,8 @@ def proof_d_robustness():
 
 def main():
     print("\n" + "#" * 78)
-    print("#  NEMORIX RETENTION LAW -- PROOF HARNESS")
-    print("#  Four classes of evidence that the formula is correct & good.")
+    print("#  NEMORIX RETENTION LAW -- EMPIRICAL EVIDENCE HARNESS")
+    print("#  Four simulator studies; these are not mathematical proofs.")
     print("#" * 78 + "\n")
     # Pre-warm the cache for the three main policies (used by A, C, D).
     # Ablation runs with modified kwargs are not cacheable with the base runs

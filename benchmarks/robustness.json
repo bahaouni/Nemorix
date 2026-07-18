@@ -59,8 +59,8 @@
     "semantic.max_gpu_resident_agents": {
       "policy": "semantic",
       "metric": "max_gpu_resident_agents",
-      "mean": 6.125,
-      "std": 0.3307,
+      "mean": 6.75,
+      "std": 0.433,
       "min": 6.0,
       "max": 7.0,
       "n": 8
@@ -77,19 +77,19 @@
     "lru.avg_resume_latency_ms": {
       "policy": "lru",
       "metric": "avg_resume_latency_ms",
-      "mean": 9.9904,
-      "std": 0.2959,
-      "min": 9.3961,
-      "max": 10.3702,
+      "mean": 16.3697,
+      "std": 0.3862,
+      "min": 15.6186,
+      "max": 16.8465,
       "n": 8
     },
     "semantic.avg_resume_latency_ms": {
       "policy": "semantic",
       "metric": "avg_resume_latency_ms",
-      "mean": 9.4962,
-      "std": 0.2066,
-      "min": 9.1861,
-      "max": 9.8795,
+      "mean": 15.5953,
+      "std": 0.5094,
+      "min": 14.9904,
+      "max": 16.6256,
       "n": 8
     },
     "no_offload.p50_resume_latency_ms": {
@@ -104,19 +104,19 @@
     "lru.p50_resume_latency_ms": {
       "policy": "lru",
       "metric": "p50_resume_latency_ms",
-      "mean": 9.9218,
-      "std": 0.3443,
-      "min": 9.3081,
-      "max": 10.4463,
+      "mean": 17.5792,
+      "std": 0.6154,
+      "min": 16.5438,
+      "max": 18.5673,
       "n": 8
     },
     "semantic.p50_resume_latency_ms": {
       "policy": "semantic",
       "metric": "p50_resume_latency_ms",
-      "mean": 9.8151,
-      "std": 0.251,
-      "min": 9.5156,
-      "max": 10.4163,
+      "mean": 18.0257,
+      "std": 0.9126,
+      "min": 16.6735,
+      "max": 19.7418,
       "n": 8
     },
     "no_offload.p95_resume_latency_ms": {
@@ -131,19 +131,19 @@
     "lru.p95_resume_latency_ms": {
       "policy": "lru",
       "metric": "p95_resume_latency_ms",
-      "mean": 14.4966,
-      "std": 0.2526,
-      "min": 13.9899,
-      "max": 14.8575,
+      "mean": 25.7679,
+      "std": 0.449,
+      "min": 24.8671,
+      "max": 26.4095,
       "n": 8
     },
     "semantic.p95_resume_latency_ms": {
       "policy": "semantic",
       "metric": "p95_resume_latency_ms",
-      "mean": 14.3822,
-      "std": 0.4036,
-      "min": 13.4253,
-      "max": 14.8575,
+      "mean": 25.6902,
+      "std": 0.6198,
+      "min": 24.2449,
+      "max": 26.4095,
       "n": 8
     },
     "no_offload.p99_resume_latency_ms": {
@@ -158,19 +158,19 @@
     "lru.p99_resume_latency_ms": {
       "policy": "lru",
       "metric": "p99_resume_latency_ms",
-      "mean": 15.3039,
-      "std": 0.2739,
-      "min": 14.8697,
-      "max": 15.6271,
+      "mean": 27.203,
+      "std": 0.4869,
+      "min": 26.4311,
+      "max": 27.7777,
       "n": 8
     },
     "semantic.p99_resume_latency_ms": {
       "policy": "semantic",
       "metric": "p99_resume_latency_ms",
-      "mean": 15.3049,
-      "std": 0.2583,
-      "min": 14.8697,
-      "max": 15.6271,
+      "mean": 27.1315,
+      "std": 0.6057,
+      "min": 25.9738,
+      "max": 27.7777,
       "n": 8
     },
     "no_offload.avg_gpu_utilization": {
@@ -194,10 +194,10 @@
     "semantic.avg_gpu_utilization": {
       "policy": "semantic",
       "metric": "avg_gpu_utilization",
-      "mean": 0.9095,
-      "std": 0.0036,
-      "min": 0.9046,
-      "max": 0.9148,
+      "mean": 0.9152,
+      "std": 0.0079,
+      "min": 0.8976,
+      "max": 0.927,
       "n": 8
     },
     "no_offload.eviction_accuracy": {
@@ -221,10 +221,10 @@
     "semantic.eviction_accuracy": {
       "policy": "semantic",
       "metric": "eviction_accuracy",
-      "mean": 0.4269,
-      "std": 0.0183,
-      "min": 0.4022,
-      "max": 0.4583,
+      "mean": 0.4245,
+      "std": 0.0186,
+      "min": 0.3954,
+      "max": 0.4594,
       "n": 8
     },
     "no_offload.total_cost_per_hour": {
@@ -248,10 +248,10 @@
     "semantic.total_cost_per_hour": {
       "policy": "semantic",
       "metric": "total_cost_per_hour",
-      "mean": 8.5233,
-      "std": 0.0127,
-      "min": 8.4945,
-      "max": 8.5393,
+      "mean": 8.5512,
+      "std": 0.0443,
+      "min": 8.4485,
+      "max": 8.5968,
       "n": 8
     },
     "no_offload.cost_per_agent_hour": {
@@ -275,10 +275,10 @@
     "semantic.cost_per_agent_hour": {
       "policy": "semantic",
       "metric": "cost_per_agent_hour",
-      "mean": 0.1705,
-      "std": 0.0003,
-      "min": 0.1699,
-      "max": 0.1708,
+      "mean": 0.171,
+      "std": 0.0009,
+      "min": 0.169,
+      "max": 0.1719,
       "n": 8
     }
   }

@@ -6,7 +6,7 @@ is accidentally changed, making the simulation unrealistic.
 
 Reference sources used:
   - NVIDIA H100 SXM5 datasheet (HBM3 bandwidth 3350 GB/s)
-  - Samsung CMM-D / SK Hynix AiMX CXL 2.0 datasheet (~64 GB/s read)
+  - Samsung CMM-D (MD220) CXL 2.0 measured sequential read (~36 GB/s)
   - NVMe PCIe Gen4 spec (7 GB/s sequential read; Samsung 990 Pro)
   - Llama-3-70B model card (80 layers, 8 KV heads, 128 head_dim, FP16)
   - vLLM/MLPerf Inference v4 offline benchmarks (40-60K tokens/s prefill on H100 FP16)
@@ -82,7 +82,14 @@ def test_kv_bytes_per_layer():
 # ---------------------------------------------------------------------------
 
 def test_transfer_time_ordering():
-    """GPU must be fastest tier, then CXL, then RAM, then SSD."""
+    """GPU must be fastest; SSD must be slowest; CXL/RAM in between.
+
+    NOTE: CXL bandwidth (36 GB/s) is LOWER than RAM bandwidth (50 GB/s) for
+    raw 1 GB transfers. However, the hierarchy places CXL above RAM because:
+    1. CXL stores in FP8 (0.3% quality loss) vs RAM in INT4 (1.8%)
+    2. CXL has 512 GB capacity vs RAM 256 GB (absorbs more agents)
+    The ordering tested here is: GPU < CXL|RAM < SSD (GPU fastest, SSD slowest).
+    """
     mgr = MemoryTierManager()
     size = 1024**3  # 1 GB
 
@@ -91,12 +98,20 @@ def test_transfer_time_ordering():
     ram_t = mgr.get_tier("ram").transfer_time_ms(size)
     ssd_t = mgr.get_tier("ssd").transfer_time_ms(size)
 
-    assert gpu_t < cxl_t < ram_t < ssd_t, (
-        f"Tier ordering broken: GPU={gpu_t:.1f}ms CXL={cxl_t:.1f}ms "
-        f"RAM={ram_t:.1f}ms SSD={ssd_t:.1f}ms"
+    assert gpu_t < cxl_t, (
+        f"GPU must be faster than CXL: GPU={gpu_t:.1f}ms CXL={cxl_t:.1f}ms"
+    )
+    assert gpu_t < ram_t, (
+        f"GPU must be faster than RAM: GPU={gpu_t:.1f}ms RAM={ram_t:.1f}ms"
+    )
+    assert cxl_t < ssd_t, (
+        f"CXL must be faster than SSD: CXL={cxl_t:.1f}ms SSD={ssd_t:.1f}ms"
+    )
+    assert ram_t < ssd_t, (
+        f"RAM must be faster than SSD: RAM={ram_t:.1f}ms SSD={ssd_t:.1f}ms"
     )
     print(f"  [PASS] test_transfer_time_ordering "
-          f"({gpu_t:.1f} < {cxl_t:.1f} < {ram_t:.1f} < {ssd_t:.1f} ms for 1 GB)")
+          f"(GPU={gpu_t:.1f} CXL={cxl_t:.1f} RAM={ram_t:.1f} SSD={ssd_t:.1f} ms for 1 GB)")
 
 
 def test_gpu_transfer_time_h100():
@@ -112,21 +127,21 @@ def test_gpu_transfer_time_h100():
     print(f"  [PASS] test_gpu_transfer_time_h100 ({computed_ms:.3f} ms for 1 GB)")
 
 
-def test_cxl_transfer_time_64gbps():
-    """CXL at 64 GB/s (Samsung CMM-D): 1 GB should take ~15.6 ms."""
+def test_cxl_transfer_time_36gbps():
+    """CXL at 36 GB/s (Samsung CMM-D measured): 1 GB should take ~27.8 ms."""
     cxl = MemoryTierManager().get_tier("cxl")
     size = 1024**3  # 1 GB
-    expected_ms = (1.0 / 64.0) * 1000.0 + 5.0 / 1000.0  # ~15.63 ms
+    expected_ms = (1.0 / 36.0) * 1000.0 + 5.0 / 1000.0  # ~27.78 ms
     computed_ms = cxl.transfer_time_ms(size)
     rel_error = abs(computed_ms - expected_ms) / expected_ms
     assert rel_error < TOLERANCE, (
         f"CXL transfer time: expected {expected_ms:.3f}ms, got {computed_ms:.3f}ms"
     )
-    # Also assert CXL is within realistic hardware bounds (10–30 ms/GB)
-    assert 10.0 <= computed_ms <= 30.0, (
-        f"CXL 1 GB transfer {computed_ms:.1f}ms is outside realistic hardware range [10,30]ms"
+    # Also assert CXL is within realistic hardware bounds (20–40 ms/GB)
+    assert 20.0 <= computed_ms <= 40.0, (
+        f"CXL 1 GB transfer {computed_ms:.1f}ms is outside realistic hardware range [20,40]ms"
     )
-    print(f"  [PASS] test_cxl_transfer_time_64gbps ({computed_ms:.2f} ms for 1 GB)")
+    print(f"  [PASS] test_cxl_transfer_time_36gbps ({computed_ms:.2f} ms for 1 GB)")
 
 
 def test_ssd_transfer_time_gen4():
@@ -589,7 +604,7 @@ if __name__ == "__main__":
         # Transfer time physics
         test_transfer_time_ordering,
         test_gpu_transfer_time_h100,
-        test_cxl_transfer_time_64gbps,
+        test_cxl_transfer_time_36gbps,
         test_ssd_transfer_time_gen4,
         test_transfer_time_scales_linearly_with_size,
         test_transfer_time_nonnegative,
